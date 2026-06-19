@@ -1,0 +1,23 @@
+{
+    "schemaVersion": 1,
+    "id": "catworldmod",
+    "version": "${version}",
+    "name": "CatWorldRp",
+    "description": "Modo del roleplay y proyecto Catworld Rp",
+    "authors": [
+        "Mapache2212 Games"
+    ],
+    "license": "CC0-1.0",
+    "environment": "server",
+    "entrypoints": {
+        "main": [
+            "catworld.welcome"
+        ]
+    },
+    "depends": {
+        "fabricloader": ">=0.16.9",
+        "minecraft": "~1.21.1",
+        "java": ">=21",
+        "fabric-api": "*"
+    }
+}
