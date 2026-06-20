@@ -1,6 +1,7 @@
 package catworld.realEstateSystem;
 
-import net.minecraft.util.Uuids;
+import java.util.UUID;
+
 import net.minecraft.util.math.BlockPos;
 
 /**
@@ -12,7 +13,7 @@ public class Property {
     private final BlockPos signPosition;
     private final BlockPos minPosition;
     private final BlockPos maxPosition;
-    private Uuids ownerUUID;   // null if the property is unowned
+    private UUID ownerUUID;   // null if the property is unowned
     private final int price;
 
     /**
@@ -21,15 +22,13 @@ public class Property {
      * @param signPosition .
      * @param minPosition .
      * @param maxPosition .
-     * @param ownerUUID .
      * @param price .
      */
-    public Property(String id, BlockPos signPosition, BlockPos minPosition, BlockPos maxPosition, Uuids ownerUUID, int price) {
+    public Property(String id, BlockPos signPosition, BlockPos minPosition, BlockPos maxPosition, int price) {
         this.id = id;
         this.signPosition = signPosition;
         this.minPosition = minPosition;
         this.maxPosition = maxPosition;
-        this.ownerUUID = ownerUUID;
         this.price = price;
     }
 
@@ -60,11 +59,11 @@ public class Property {
         return maxPosition;
     }
 
-    public Uuids getOwnerUUID() {
+    public UUID getOwnerUUID() {
         return ownerUUID;
     }
 
-    public void setOwnerUUID(Uuids ownerUUID) {
+    public void setOwnerUUID(UUID ownerUUID) {
         this.ownerUUID = ownerUUID;
     }
 
