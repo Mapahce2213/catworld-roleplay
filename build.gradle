@@ -7,6 +7,7 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
+    mavenCentral()
 }
 
 loom {
@@ -24,6 +25,8 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.minecraft_version}+build.3:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 }
 
 processResources {
@@ -60,4 +63,16 @@ publishing {
 	}
 	repositories {
 	}
+}
+
+test {
+    useJUnitPlatform()	// uses JUnit 5
+}
+
+sourceSets {
+    test {
+        java {
+            srcDirs = ['src/test/java']
+        }
+    }
 }
