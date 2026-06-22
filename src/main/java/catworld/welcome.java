@@ -1,12 +1,14 @@
 package catworld;
 import catworld.commandos;
 import catworld.tablist;
+import catworld.realEstateSystem.RealEstateManager;
 import catworld.boardes;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -67,6 +69,8 @@ private static final Map<UUID, DefaultedList<ItemStack>> worldInventories = new 
 	@Override
     public void onInitialize() {
         System.out.println("Catworld модификация была активированна | El modo has activado");
+        
+        RealEstateManager.init();
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.player;
@@ -118,8 +122,31 @@ if (player.getStatHandler().getStat(net.minecraft.stat.Stats.CUSTOM.getOrCreateS
             server.getPlayerManager().broadcast(Text.literal(""), false);
         });
 
+        // blocks breaking
         AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
+            if (world.isClient()) return ActionResult.PASS;
+
+            // *Now the owner of the estate can break blocks (only in his property)
+            if (RealEstateManager.canBuildHere(player.getUuid(), pos)) {
+                return ActionResult.PASS; 
+            }
+
             player.sendMessage(Text.literal("§cAqui no puede destruir blockes >:("), false);
+            return ActionResult.FAIL;
+        });
+
+        // blocks interacting
+        UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
+            if (world.isClient()) return ActionResult.PASS;
+
+            BlockPos pos = hitResult.getBlockPos();
+
+            // *Now the owner of the estate can place blocks (only in his property)
+            if (RealEstateManager.canBuildHere(player.getUuid(), pos)) {
+                return ActionResult.PASS; 
+            }
+
+            player.sendMessage(Text.literal("§cAqui no puede colocar bloques o interactuar >:("), false);
             return ActionResult.FAIL;
         });
 
