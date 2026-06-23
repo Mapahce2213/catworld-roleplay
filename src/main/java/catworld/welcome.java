@@ -3,6 +3,8 @@ import catworld.commandos;
 import catworld.tablist;
 import catworld.realEstateSystem.RealEstateManager;
 import catworld.boardes;
+import catworld.blocker;
+
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -70,7 +72,9 @@ private static final Map<UUID, DefaultedList<ItemStack>> worldInventories = new 
     public void onInitialize() {
         System.out.println("Catworld модификация была активированна | El modo has activado");
         
-        RealEstateManager.init();
+ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            RealEstateManager.init(server);
+        });
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.player;
@@ -122,33 +126,8 @@ if (player.getStatHandler().getStat(net.minecraft.stat.Stats.CUSTOM.getOrCreateS
             server.getPlayerManager().broadcast(Text.literal(""), false);
         });
 
-        // blocks breaking
-        AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
-            if (world.isClient()) return ActionResult.PASS;
-
-            // *Now the owner of the estate can break blocks (only in his property)
-            if (RealEstateManager.canBuildHere(player.getUuid(), pos)) {
-                return ActionResult.PASS; 
-            }
-
-            player.sendMessage(Text.literal("§cAqui no puede destruir blockes >:("), false);
-            return ActionResult.FAIL;
-        });
-
-        // blocks interacting
-        UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
-            if (world.isClient()) return ActionResult.PASS;
-
-            BlockPos pos = hitResult.getBlockPos();
-
-            // *Now the owner of the estate can place blocks (only in his property)
-            if (RealEstateManager.canBuildHere(player.getUuid(), pos)) {
-                return ActionResult.PASS; 
-            }
-
-            player.sendMessage(Text.literal("§cAqui no puede colocar bloques o interactuar >:("), false);
-            return ActionResult.FAIL;
-        });
+blocker.blockblock();
+blocker.changeblock();
 
 commandos.register();
 boardes.reglas();
@@ -156,20 +135,21 @@ commandos.item();
 
 tablist.register();
 
+ ServerMessageEvents.ALLOW_CHAT_MESSAGE.register((message, sender, params) -> {
 
-ServerMessageEvents.CHAT_MESSAGE.register((message, sender, params) -> {
-    // Формируем текст
-    Text localMessage = Text.literal("[" + sender.getName().getString() + "] " + "[ADMIN] " + message.getContent().getString());
+            Text localMessage = Text.literal(
+                "[" + sender.getName().getString() + "] [ADMIN] " + message.getContent().getString()
+            );
 
-    // Рассылаем только игрокам поблизости
-    for (ServerPlayerEntity target : sender.getServer().getPlayerManager().getPlayerList()) {
-        double distance = sender.getBlockPos().getManhattanDistance(target.getBlockPos());
-        if (distance <= 20) {
-            target.sendMessage(localMessage, false);
-        }
-    }
-    // ❌ Никакого return — этот колбэк void
-});
+            for (ServerPlayerEntity target : sender.getServer().getPlayerManager().getPlayerList()) {
+                double distance = sender.getBlockPos().getManhattanDistance(target.getBlockPos());
+                if (distance <= 20) {
+                    target.sendMessage(localMessage, false);
+                }
+            }
+
+            return false;
+        });
 
 
 
