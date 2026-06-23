@@ -1,0 +1,50 @@
+[
+  {
+    "id": "Apartment #001",
+    "tablichka": { "x": 149, "y": 4, "z": 154 },
+    "minPosition": { "x": 148, "y": 3, "z": 150 },
+    "maxPosition": { "x": 156, "y": 6, "z": 167 },
+    "price": 10,
+    "ownerUUID": null
+  },
+  {
+    "id": "Apartment #002",
+    "tablichka": { "x": 142, "y": 4, "z": 154 },
+    "minPosition": { "x": 132, "y": 3, "z": 150 },
+    "maxPosition": { "x": 140, "y": 6, "z": 167 },
+    "price": 10,
+    "ownerUUID": null
+  },
+  {
+    "id": "Apartment #003",
+    "tablichka": { "x": 146, "y": 8, "z": 157 },
+    "minPosition": { "x": 148, "y": 7, "z": 150 },
+    "maxPosition": { "x": 156, "y": 10, "z": 167 },
+    "price": 10,
+    "ownerUUID": null
+  },
+  {
+    "id": "Apartment #004",
+    "tablichka": { "x": 141, "y": 8, "z": 155 },
+    "minPosition": { "x": 139, "y": 7, "z": 150 },
+    "maxPosition": { "x": 132, "y": 10, "z": 167 },
+    "price": 10,
+    "ownerUUID": null
+  },
+  {
+    "id": "Apartment #005",
+    "tablichka": { "x": 146, "y": 12, "z": 158 },
+    "minPosition": { "x": 148, "y": 11, "z": 150 },
+    "maxPosition": { "x": 156, "y": 14, "z": 167 },
+    "price": 10,
+    "ownerUUID": null
+  },
+  {
+    "id": "Apartment #006",
+    "tablichka": { "x": 141, "y": 12, "z": 152 },
+    "minPosition": { "x": 139, "y": 11, "z": 150 },
+    "maxPosition": { "x": 132, "y": 14, "z": 167 },
+    "price": 10,
+    "ownerUUID": null
+  }
+]
