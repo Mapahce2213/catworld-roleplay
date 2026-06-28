@@ -19,7 +19,6 @@ public class RealEstateManager {
     private static final Map<String, Property> propertiesById = new HashMap<>();
 
     public static void init(MinecraftServer server) {
-
         Property.loadAll(propertiesBySign, propertiesById);
 
         for (Property property : propertiesById.values()) {
@@ -58,32 +57,61 @@ public class RealEstateManager {
         });
     }
 
-    private static void spawnSign(MinecraftServer server, Property property) {
-        BlockPos pos = property.getSignPosition();
-        int x = pos.getX();
-        int y = pos.getY();
-        int z = pos.getZ();
+  private static void spawnSign(MinecraftServer server, Property property) {
+    BlockPos pos = property.getSignPosition();
+    int x = pos.getX();
+    int y = pos.getY();
+    int z = pos.getZ();
 
-        run(server, String.format("setblock %d %d %d minecraft:oak_sign", x, y, z));
-
-        String ownerLine;
-        String ownerColor;
-        UUID owner = property.getOwnerUUID();
-        if (owner == null) {
-            ownerLine = "selling";
-            ownerColor = "red";
-        } else {
-            ServerPlayerEntity ownerPlayer = server.getPlayerManager().getPlayer(owner);
-            ownerLine = ownerPlayer != null ? ownerPlayer.getName().getString() : owner.toString();
-            ownerColor = "yellow";
+    net.minecraft.server.world.ServerWorld world = server.getOverworld();
+    String facing = "north";
+    
+    if (world != null) {
+        if (world.getBlockState(pos.south()).isSolidBlock(world, pos.south())) {
+            facing = "north";
+        } else if (world.getBlockState(pos.north()).isSolidBlock(world, pos.north())) {
+            facing = "south";
+        } else if (world.getBlockState(pos.east()).isSolidBlock(world, pos.east())) {
+            facing = "west";
+        } else if (world.getBlockState(pos.west()).isSolidBlock(world, pos.west())) {
+            facing = "east";
         }
-
-        String dataCmd = String.format(
-            "data merge block %d %d %d {front_text:{messages:['{\"text\":\"%s\",\"color\":\"aqua\",\"bold\":true}','{\"text\":\"%s\",\"color\":\"%s\"}','{\"text\":\"%d$\",\"color\":\"green\"}','{\"text\":\"\"}']}}",
-            x, y, z, property.getId(), ownerLine, ownerColor, property.getPrice()
-        );
-        run(server, dataCmd);
     }
+
+    run(server, String.format("setblock %d %d %d minecraft:oak_wall_sign[facing=%s]", x, y, z, facing));
+
+    String line2 = "";
+    String line2Color = "white";
+    String line3 = "";
+    String line3Color = "white";
+
+    UUID owner = property.getOwnerUUID();
+    
+    if (owner == null) {
+        line2 = property.getPrice() + "$";
+        line2Color = "green";
+        line3 = "selling";
+        line3Color = "red";
+    } else {
+        ServerPlayerEntity ownerPlayer = server.getPlayerManager().getPlayer(owner);
+        line2 = ownerPlayer != null ? ownerPlayer.getName().getString() : owner.toString();
+        line2Color = "yellow";
+        
+        if (line2.length() > 15) {
+            line2 = line2.substring(0, 15);
+        }
+        
+        line3 = ""; 
+        line3Color = "white";
+    }
+
+    String dataCmd = String.format(
+        "data merge block %d %d %d {front_text:{messages:['{\"text\":\"%s\",\"color\":\"aqua\",\"bold\":true}','{\"text\":\"%s\",\"color\":\"%s\"}','{\"text\":\"%s\",\"color\":\"%s\"}','{\"text\":\"\"}']}}",
+        x, y, z, property.getId(), line2, line2Color, line3, line3Color
+    );
+    run(server, dataCmd);
+}
+
 
     private static void run(MinecraftServer server, String command) {
         server.getCommandManager().executeWithPrefix(server.getCommandSource(), command);
@@ -118,3 +146,4 @@ public class RealEstateManager {
         return false;
     }
 }
+
