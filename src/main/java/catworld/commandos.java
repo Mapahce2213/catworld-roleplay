@@ -10,6 +10,18 @@ import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.entity.passive.AbstractHorseEntity;
+import net.minecraft.entity.passive.HorseEntity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.screen.HorseScreenHandler;
+import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.util.TypedActionResult;
@@ -36,6 +48,19 @@ public class commandos {
 
                 return TypedActionResult.success(stack);
             }
+            
+            
+                  if (stack.getItem() == Items.COMPASS &&
+                stack.get(DataComponentTypes.CUSTOM_NAME) != null &&
+                stack.get(DataComponentTypes.CUSTOM_NAME).getString().contains("Navigation")) {
+
+                player.getServer().getCommandManager().executeWithPrefix(
+                    player.getCommandSource(), "menu"
+                );
+
+                return TypedActionResult.success(stack);
+            }
+            
 
             return TypedActionResult.pass(stack);
         });
@@ -46,9 +71,57 @@ public class commandos {
 
             dispatcher.register(
                 CommandManager.literal("tellraw")
-                    .requires(source -> false) // никто и никогда не сможет её выполнить
+                    .requires(source -> false)
             );
 
+
+dispatcher.register(CommandManager.literal("menu").executes(context -> {
+    ServerPlayerEntity player = context.getSource().getPlayer();
+    if (player == null) return 0;
+
+    SimpleInventory menuInventory = new SimpleInventory(54);
+
+    ItemStack lightBlueGlass = new ItemStack(Items.LIGHT_BLUE_STAINED_GLASS_PANE);
+    lightBlueGlass.set(DataComponentTypes.CUSTOM_NAME, Text.literal("§bJugar!"));
+
+    ItemStack redGlass = new ItemStack(Items.RED_STAINED_GLASS_PANE);
+    redGlass.set(DataComponentTypes.CUSTOM_NAME, Text.literal("§cDonacion"));
+
+    ItemStack blueGlass = new ItemStack(Items.BLUE_STAINED_GLASS_PANE);
+    blueGlass.set(DataComponentTypes.CUSTOM_NAME, Text.literal("§9Ayuda"));
+
+    ItemStack borderGlass = new ItemStack(Items.BLACK_STAINED_GLASS_PANE);
+    borderGlass.set(DataComponentTypes.CUSTOM_NAME, Text.empty());
+
+    for (int row = 0; row < 6; row++) {
+        for (int col = 0; col < 9; col++) {
+            int slot = row * 9 + col;
+
+            if (col < 2 || col > 6) {
+                menuInventory.setStack(slot, borderGlass.copy());
+                continue;
+            }
+
+            if (row == 0 || row == 1) {
+                menuInventory.setStack(slot, lightBlueGlass.copy());
+            } else if (row >= 2 && row <= 4) {
+                menuInventory.setStack(slot, redGlass.copy());
+            } else if (row == 5) {
+                menuInventory.setStack(slot, blueGlass.copy());
+            }
+        }
+    }
+
+      player.openHandledScreen(new net.minecraft.screen.SimpleNamedScreenHandlerFactory(
+        (syncId, playerInv, p) -> net.minecraft.screen.GenericContainerScreenHandler.createGeneric9x6(syncId, playerInv, menuInventory),
+        Text.literal("Catworld Menu")
+    ));
+
+    return 1;
+}));
+
+            
+            
             // /spawn
             dispatcher.register(CommandManager.literal("spawn").executes(context -> {
                 ServerPlayerEntity player = context.getSource().getPlayer();

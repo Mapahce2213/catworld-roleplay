@@ -18,7 +18,6 @@ public class boardes {
 
     static {
         try {
-            // 1. Достаем ключ ТЕКСТА
             Field textField;
             try {
                 textField = DisplayEntity.TextDisplayEntity.class.getDeclaredField("TEXT");
@@ -27,8 +26,6 @@ public class boardes {
             }
             textField.setAccessible(true);
             TEXT_DATA_KEY = (TrackedData<Text>) textField.get(null);
-
-            // 2. Достаем ключ БИЛЛБОРДА (он находится в родительском классе DisplayEntity)
             Field billboardField;
             try {
                 billboardField = DisplayEntity.class.getDeclaredField("BILLBOARD");
@@ -38,7 +35,6 @@ public class boardes {
             billboardField.setAccessible(true);
             BILLBOARD_DATA_KEY = (TrackedData<Byte>) billboardField.get(null);
 
-            // 3. Достаем ключ ФОНА
             Field bgField;
             try {
                 bgField = DisplayEntity.TextDisplayEntity.class.getDeclaredField("BACKGROUND");
@@ -67,10 +63,8 @@ public class boardes {
                                    String tag, String text, Formatting color, boolean bold) {
         
 
-        // Создаем новую сущность Text Display
         DisplayEntity.TextDisplayEntity textDisplay = new DisplayEntity.TextDisplayEntity(EntityType.TEXT_DISPLAY, world);
         
-        // Задаем координаты
         textDisplay.refreshPositionAndAngles(x, y, z, 0.0F, 0.0F);
 
         // Собираем чистый текст средствами Java (никакого JSON-парсинга строк в игре)
