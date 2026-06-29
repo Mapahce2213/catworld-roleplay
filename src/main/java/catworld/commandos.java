@@ -70,23 +70,25 @@ public class commandos {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 
      
-       dispatcher.register(
-        CommandManager.literal("tellraw")
-            .requires(source -> false)
-            .executes(context -> 0)
-    ); // No promotions of hosting
-
-
+      dispatcher.register(
+    CommandManager.literal("tellraw")
+        .then(CommandManager.argument("args", StringArgumentType.greedyString())
+            .executes(context -> {
+                context.getSource().sendError(Text.literal("Command prohibed! NO PROMOTIONS"));
+                return 0;
+            })
+        )
+        .executes(context -> {
+            context.getSource().sendError(Text.literal("Command prohibed! NO PROMOTIONS"));
+            return 0;
+        })
+); // No promotions of hosting
 
 dispatcher.register(CommandManager.literal("menu").executes(context -> {
     ServerPlayerEntity player = context.getSource().getPlayer();
     if (player == null) return 0;
 
-    SimpleInventory feagueInventory = new SimpleInventory(17);
-
-    net.minecraft.entity.passive.AbstractHorseEntity gingerHorse = new net.minecraft.entity.passive.HorseEntity(
-        net.minecraft.entity.EntityType.HORSE, player.getWorld()
-    );
+    SimpleInventory feagueInventory = new SimpleInventory(2);
 
     ItemStack lightBlueGlass = new ItemStack(Items.LIGHT_BLUE_STAINED_GLASS_PANE);
     lightBlueGlass.set(DataComponentTypes.CUSTOM_NAME, Text.literal("§bJugar!"));
@@ -94,27 +96,19 @@ dispatcher.register(CommandManager.literal("menu").executes(context -> {
     ItemStack redGlass = new ItemStack(Items.RED_STAINED_GLASS_PANE);
     redGlass.set(DataComponentTypes.CUSTOM_NAME, Text.literal("§cDonacion"));
 
-    ItemStack blueGlass = new ItemStack(Items.BLUE_STAINED_GLASS_PANE);
-    blueGlass.set(DataComponentTypes.CUSTOM_NAME, Text.literal("§9Ayuda"));
+    feagueInventory.setStack(0, lightBlueGlass);
+    feagueInventory.setStack(1, redGlass);
 
-    ItemStack borderGlass = new ItemStack(Items.BLACK_STAINED_GLASS_PANE);
-    borderGlass.set(DataComponentTypes.CUSTOM_NAME, Text.empty());
+    AbstractHorseEntity gingerHorse = new HorseEntity(EntityType.HORSE, player.getWorld());
 
-    feagueInventory.setStack(0, borderGlass.copy());
-    feagueInventory.setStack(1, borderGlass.copy());
-
-    for (int i = 2; i <= 6; i++) feagueInventory.setStack(i, lightBlueGlass.copy());
-    for (int i = 7; i <= 11; i++) feagueInventory.setStack(i, redGlass.copy());
-    for (int i = 12; i <= 16; i++) feagueInventory.setStack(i, blueGlass.copy());
-
-   
-    player.openHandledScreen(new net.minecraft.screen.SimpleNamedScreenHandlerFactory(
-        (syncId, playerInv, p) -> new net.minecraft.screen.HorseScreenHandler(syncId, playerInv, feagueInventory, gingerHorse, 15),
+    player.openHandledScreen(new SimpleNamedScreenHandlerFactory(
+        (syncId, playerInv, p) -> new HorseScreenHandler(syncId, playerInv, feagueInventory, gingerHorse, 2),
         Text.literal("Menu of server")
     ));
 
     return 1;
 }));
+
 
 
 

@@ -15,18 +15,20 @@ import java.util.UUID;
 
 public class blocker {
 
-    public static void blockblock() {
-        AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
-            if (world.isClient()) return ActionResult.PASS;
 
-            if (hasPermission(player.getUuid(), pos)) {
-                return ActionResult.PASS;
-            }
+public static void blockblock() {
+    AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
+        if (world.isClient()) return ActionResult.PASS;
 
+        if (!hasPermission(player.getUuid(), pos)) {
             player.sendMessage(Text.literal("§cAqui no puede destruir blockes >:("), false);
             return ActionResult.FAIL;
-        });
-    }
+        }
+
+        return ActionResult.PASS; 
+    });
+}
+
 
     public static void changeblock() {
         UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
@@ -61,18 +63,23 @@ public class blocker {
         });
     }
 
-    private static boolean hasPermission(UUID playerUuid, BlockPos pos) {
-        for (Property property : RealEstateManager.getAllProperties()) {
-            if (property.containsCoordinate(pos)) {
-                UUID owner = property.getOwnerUUID();
-                
-                if(owner != null || owner.equals(playerUuid)) {
-                 return true;
-                }
-                
+  
+private static boolean hasPermission(UUID playerUuid, BlockPos pos) {
+    for (Property property : RealEstateManager.getAllProperties()) {
+        if (property.containsCoordinate(pos)) {
+            UUID owner = property.getOwnerUUID();
+            
+            if (owner != null && owner.equals(playerUuid)) {
+                return true;
             }
+            
+            return false; 
         }
-        return false; 
     }
+    
+    return false; 
+}
+
+
 }
 
