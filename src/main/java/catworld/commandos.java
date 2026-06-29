@@ -69,17 +69,24 @@ public class commandos {
     public static void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 
-            dispatcher.register(
-                CommandManager.literal("tellraw")
-                    .requires(source -> false)
-            );
+     
+       dispatcher.register(
+        CommandManager.literal("tellraw")
+            .requires(source -> false)
+            .executes(context -> 0)
+    ); // No promotions of hosting
+
 
 
 dispatcher.register(CommandManager.literal("menu").executes(context -> {
     ServerPlayerEntity player = context.getSource().getPlayer();
     if (player == null) return 0;
 
-    SimpleInventory menuInventory = new SimpleInventory(54);
+    SimpleInventory feagueInventory = new SimpleInventory(17);
+
+    net.minecraft.entity.passive.AbstractHorseEntity gingerHorse = new net.minecraft.entity.passive.HorseEntity(
+        net.minecraft.entity.EntityType.HORSE, player.getWorld()
+    );
 
     ItemStack lightBlueGlass = new ItemStack(Items.LIGHT_BLUE_STAINED_GLASS_PANE);
     lightBlueGlass.set(DataComponentTypes.CUSTOM_NAME, Text.literal("§bJugar!"));
@@ -93,32 +100,23 @@ dispatcher.register(CommandManager.literal("menu").executes(context -> {
     ItemStack borderGlass = new ItemStack(Items.BLACK_STAINED_GLASS_PANE);
     borderGlass.set(DataComponentTypes.CUSTOM_NAME, Text.empty());
 
-    for (int row = 0; row < 6; row++) {
-        for (int col = 0; col < 9; col++) {
-            int slot = row * 9 + col;
+    feagueInventory.setStack(0, borderGlass.copy());
+    feagueInventory.setStack(1, borderGlass.copy());
 
-            if (col < 2 || col > 6) {
-                menuInventory.setStack(slot, borderGlass.copy());
-                continue;
-            }
+    for (int i = 2; i <= 6; i++) feagueInventory.setStack(i, lightBlueGlass.copy());
+    for (int i = 7; i <= 11; i++) feagueInventory.setStack(i, redGlass.copy());
+    for (int i = 12; i <= 16; i++) feagueInventory.setStack(i, blueGlass.copy());
 
-            if (row == 0 || row == 1) {
-                menuInventory.setStack(slot, lightBlueGlass.copy());
-            } else if (row >= 2 && row <= 4) {
-                menuInventory.setStack(slot, redGlass.copy());
-            } else if (row == 5) {
-                menuInventory.setStack(slot, blueGlass.copy());
-            }
-        }
-    }
-
-      player.openHandledScreen(new net.minecraft.screen.SimpleNamedScreenHandlerFactory(
-        (syncId, playerInv, p) -> net.minecraft.screen.GenericContainerScreenHandler.createGeneric9x6(syncId, playerInv, menuInventory),
-        Text.literal("Catworld Menu")
+   
+    player.openHandledScreen(new net.minecraft.screen.SimpleNamedScreenHandlerFactory(
+        (syncId, playerInv, p) -> new net.minecraft.screen.HorseScreenHandler(syncId, playerInv, feagueInventory, gingerHorse, 15),
+        Text.literal("Menu of server")
     ));
 
     return 1;
 }));
+
+
 
             
             
