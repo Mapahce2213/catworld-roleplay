@@ -26,8 +26,8 @@
   {
     "id": "Apartment #004",
     "tablichka": { "x": 141, "y": 8, "z": 155 },
-    "minPosition": { "x": 139, "y": 7, "z": 150 },
-    "maxPosition": { "x": 132, "y": 10, "z": 167 },
+    "minPosition": { "x": 132, "y": 7, "z": 150 },
+    "maxPosition": { "x": 139, "y": 10, "z": 167 },
     "price": 10,
     "ownerUUID": null
   },
@@ -42,9 +42,10 @@
   {
     "id": "Apartment #006",
     "tablichka": { "x": 141, "y": 12, "z": 152 },
-    "minPosition": { "x": 139, "y": 11, "z": 150 },
-    "maxPosition": { "x": 132, "y": 14, "z": 167 },
+    "minPosition": { "x": 132, "y": 11, "z": 150 },
+    "maxPosition": { "x": 139, "y": 14, "z": 167 },
     "price": 10,
     "ownerUUID": null
   }
 ]
+
