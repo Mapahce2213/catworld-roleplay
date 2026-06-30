@@ -55,7 +55,7 @@ public class commandos {
                 stack.get(DataComponentTypes.CUSTOM_NAME).getString().contains("Navigation")) {
 
                 player.getServer().getCommandManager().executeWithPrefix(
-                    player.getCommandSource(), "menu"
+                    player.getCommandSource(), "namenu"
                 );
 
                 return TypedActionResult.success(stack);
@@ -84,7 +84,7 @@ public class commandos {
         })
 ); // No promotions of hosting
 
-dispatcher.register(CommandManager.literal("menu").executes(context -> {
+dispatcher.register(CommandManager.literal("namenu").executes(context -> {
     ServerPlayerEntity player = context.getSource().getPlayer();
     if (player == null) return 0;
 
