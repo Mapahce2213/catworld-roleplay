@@ -35,13 +35,24 @@ public class Property {
     private UUID ownerUUID;
     private final int price;
 
-    public Property(String id, BlockPos signPosition, BlockPos minPosition, BlockPos maxPosition, int price) {
-        this.id = id;
-        this.signPosition = signPosition;
-        this.minPosition = minPosition;
-        this.maxPosition = maxPosition;
-        this.price = price;
-    }
+  public Property(String id, BlockPos signPosition, BlockPos minPosition, BlockPos maxPosition, int price) {
+    this.id = id;
+    this.signPosition = signPosition;
+    this.price = price;
+
+    this.minPosition = new BlockPos(
+        Math.min(minPosition.getX(), maxPosition.getX()),
+        Math.min(minPosition.getY(), maxPosition.getY()),
+        Math.min(minPosition.getZ(), maxPosition.getZ())
+    );
+
+    this.maxPosition = new BlockPos(
+        Math.max(minPosition.getX(), maxPosition.getX()),
+        Math.max(minPosition.getY(), maxPosition.getY()),
+        Math.max(minPosition.getZ(), maxPosition.getZ())
+    );
+}
+
 
     public boolean containsCoordinate(BlockPos coordinate) {
         return coordinate.getX() >= this.minPosition.getX() && coordinate.getX() <= this.maxPosition.getX() &&
