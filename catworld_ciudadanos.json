@@ -1,0 +1,32 @@
+[
+{
+   "name": "Jhony Lopez",
+   "apedido": "Superov Sanchez",
+   "nickname": "Mapahce2212",
+   "edad": 36,
+   "gender": "male",
+   "passport": "u920034215w",
+   "cedula": "kitty_782135515",
+   "derechos": {
+   	"manejar": {
+   	    "autos": false,
+   	    "motos": false,
+   	    "aviones": false,
+   	    "train": false
+   	},
+   	"armas": {
+   	    "ak-47": false,
+   	    "pistola": false,
+   	    "machete": false
+   	}
+   },
+   "trabajo": {
+	"fraccion": "medico",
+	"rango": 1,
+	"title": "Soporte medical"
+   },
+   "estate": [],
+   "cars": []
+}
+]
+
