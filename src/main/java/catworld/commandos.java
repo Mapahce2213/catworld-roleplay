@@ -1,38 +1,44 @@
 package catworld;
+
 import catworld.welcome;
+import catworld.ciudadania.Ciudadanos;
+
+import java.util.Map;
+import java.util.HashMap;
 
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
+
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.entity.passive.AbstractHorseEntity;
-import net.minecraft.entity.passive.HorseEntity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.passive.AbstractHorseEntity;
+import net.minecraft.entity.passive.HorseEntity;
+import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.screen.HorseScreenHandler;
 import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-
-import net.fabricmc.fabric.api.event.player.UseItemCallback;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.Hand;
-
-import net.minecraft.item.Items;
-import net.minecraft.component.DataComponentTypes;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 
 public class commandos {
+
+    private static final Map<String, Ciudadanos> ciudadanosByCedula = new HashMap<>();
+
+static {
+    Ciudadanos.loadAll(ciudadanosByCedula);
+}
+
 
     public static void item() {
         UseItemCallback.EVENT.register((player, world, hand) -> {
@@ -138,23 +144,102 @@ dispatcher.register(CommandManager.literal("namenu").executes(context -> {
                 return 1;
             }));
 
-            // /game
-            dispatcher.register(CommandManager.literal("game").executes(context -> {
-                ServerPlayerEntity player = context.getSource().getPlayer();
-                if (player != null) {
-                    player.getInventory().main.clear();
-                    DefaultedList<ItemStack> worldInv = welcome.getWorldInventory(player.getUuid());
-                    for (int i = 0; i < worldInv.size(); i++) {
-                        player.getInventory().setStack(i, worldInv.get(i));
-                    }
+// /game
+dispatcher.register(CommandManager.literal("game").executes(context -> {
+    ServerPlayerEntity player = context.getSource().getPlayer();
+    if (player == null) return 0;
 
-                    ServerWorld world = player.getServerWorld();
-                    BlockPos pos = new BlockPos(40, 1, 68);
-                    player.teleport(world, pos.getX(), pos.getY(), pos.getZ(), player.getYaw(), player.getPitch());
-                    player.sendMessage(Text.literal("Bien provecho!").formatted(Formatting.GOLD), false);
-                }
-                return 1;
-            }));
+    String playerUuid = player.getUuid().toString();
+    Ciudadanos ciudadano = Ciudadanos.findByPassport(ciudadanosByCedula, playerUuid);
+
+    if (ciudadano == null) {
+        player.sendMessage(
+            Text.literal("Por favor escribe /register para registrar!").formatted(Formatting.GOLD, Formatting.BOLD),
+            false
+        );
+        return 1;
+    }
+
+    player.getInventory().main.clear();
+    DefaultedList<ItemStack> worldInv = welcome.getWorldInventory(player.getUuid());
+    for (int i = 0; i < worldInv.size(); i++) {
+        player.getInventory().setStack(i, worldInv.get(i));
+    }
+
+    ServerWorld world = player.getServerWorld();
+    BlockPos pos = new BlockPos(40, 1, 68);
+    player.teleport(world, pos.getX(), pos.getY(), pos.getZ(), player.getYaw(), player.getPitch());
+    player.sendMessage(Text.literal("Bien provecho!").formatted(Formatting.GOLD), false);
+
+    return 1;
+}));
+ // register <nombre> <apedido> <edad> [Male\Female]
+dispatcher.register(
+    CommandManager.literal("register")
+        .then(CommandManager.argument("nombre", StringArgumentType.word())
+            .then(CommandManager.argument("apedido", StringArgumentType.word())
+                .then(CommandManager.argument("edad", IntegerArgumentType.integer(0, 120))
+                    .then(CommandManager.argument("gender", StringArgumentType.word())
+                        .suggests((context, builder) -> {
+                            builder.suggest("Male");
+                            builder.suggest("Female");
+                            return builder.buildFuture();
+                        })
+                        .executes(context -> {
+                            ServerPlayerEntity player = context.getSource().getPlayer();
+                            String nombre = StringArgumentType.getString(context, "nombre");
+                            String apedido = StringArgumentType.getString(context, "apedido");
+                            int edad = IntegerArgumentType.getInteger(context, "edad");
+                            String gender = StringArgumentType.getString(context, "gender");
+
+                            if (!gender.equalsIgnoreCase("Male") && !gender.equalsIgnoreCase("Female")) {
+                                player.sendMessage(
+                                    Text.literal("Gender debe ser Male o Female").formatted(Formatting.RED),
+                                    false
+                                );
+                                return 0;
+                            }
+
+                            String playerUuid = player.getUuid().toString();
+
+                            if (Ciudadanos.findByPassport(ciudadanosByCedula, playerUuid) != null) {
+                                player.sendMessage(
+                                    Text.literal("Ya estás registrado!").formatted(Formatting.RED),
+                                    false
+                                );
+                                return 0;
+                            }
+
+                            Ciudadanos ciudadano = new Ciudadanos();
+                            ciudadano.setName(nombre);
+                            ciudadano.setApedido(apedido);
+                            ciudadano.setNickname(player.getGameProfile().getName());
+                            ciudadano.setEdad(edad);
+                            ciudadano.setGender(gender);
+                            ciudadano.setPassport(playerUuid);
+                            ciudadano.setCedula(playerUuid);
+
+                            ciudadanosByCedula.put(ciudadano.getCedula(), ciudadano);
+                            Ciudadanos.save(ciudadanosByCedula);
+
+                            Text message = Text.literal(
+                                player.getName().getString() + " se registró como " + nombre + " " + apedido +
+                                " (" + edad + " años, " + gender + ")"
+                            ).formatted(Formatting.YELLOW);
+
+                            player.sendMessage(message, false);
+
+                            player.getServer().getCommandManager().executeWithPrefix(
+                                player.getCommandSource(), "game"
+                            );
+
+                            return 1;
+                        })
+                    )
+                )
+            )
+        )
+);
 
             // /rpme <action>
             dispatcher.register(
