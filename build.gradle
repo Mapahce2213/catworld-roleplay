@@ -7,7 +7,7 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
-    mavenCentral()
+	mavenCentral()
 }
 
 loom {
@@ -26,7 +26,9 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+	// BCrypt для хэширования паролей (Auth.java). include() зашивает библиотеку
+	// прямо в джарник мода, чтобы она не требовалась отдельно на сервере.
+	include implementation("at.favre.lib:bcrypt:0.10.2")
 }
 
 processResources {
@@ -63,16 +65,4 @@ publishing {
 	}
 	repositories {
 	}
-}
-
-test {
-    useJUnitPlatform()	// uses JUnit 5
-}
-
-sourceSets {
-    test {
-        java {
-            srcDirs = ['src/test/java']
-        }
-    }
 }

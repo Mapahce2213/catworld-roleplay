@@ -1,0 +1,12 @@
+[
+  {
+    "uuid": "1u3d",
+    "password": "$2a$12$......",
+    "ip": "192.168.0.1",
+    "last-session": "12/01/2026 15:00",
+    "registred": "09/01/2026 12:00",
+    "banned": false,
+    "status": "player",
+    "amnistia": 0
+  }
+]
