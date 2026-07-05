@@ -1,6 +1,8 @@
 package catworld;
 
 import catworld.welcome;
+import catworld.seguridad.Auth;
+import catworld.seguridad.Joined;
 import catworld.ciudadania.Ciudadanos;
 
 import java.util.Map;
@@ -173,6 +175,94 @@ dispatcher.register(CommandManager.literal("game").executes(context -> {
 
     return 1;
 }));
+
+
+// auth register <email> <contrasena> <repita>
+// auth login <constrasena>
+
+// /auth register <email> <contrasena> <repita>
+// /auth login <contrasena>
+dispatcher.register(
+    CommandManager.literal("auth")
+        .then(CommandManager.literal("register")
+            .then(CommandManager.argument("email", StringArgumentType.word())
+                .then(CommandManager.argument("contrasena", StringArgumentType.word())
+                    .then(CommandManager.argument("repita", StringArgumentType.word())
+                        .executes(context -> {
+                            ServerPlayerEntity player = context.getSource().getPlayer();
+                            String email = StringArgumentType.getString(context, "email");
+                            String password = StringArgumentType.getString(context, "contrasena");
+                            String repeat = StringArgumentType.getString(context, "repita");
+
+                            if (!password.equals(repeat)) {
+                                player.sendMessage(
+                                    Text.literal("Las contraseñas no coinciden").formatted(Formatting.RED),
+                                    false
+                                );
+                                return 0;
+                            }
+
+                            String uuid = player.getUuid().toString();
+                            String ip = player.getIp();
+                            Map<String, Auth> authByUuid = Joined.getAuthByUuid();
+
+                            boolean success = Auth.register(authByUuid, uuid, email, password, ip);
+
+                            if (!success) {
+                                player.sendMessage(
+                                    Text.literal("Ya estás registrado!").formatted(Formatting.RED),
+                                    false
+                                );
+                                return 0;
+                            }
+
+                            Joined.markAuthenticated(player.getUuid());
+
+                            player.sendMessage(
+                                Text.literal("Registro exitoso!").formatted(Formatting.GREEN),
+                                false
+                            );
+
+                            return 1;
+                        })
+                    )
+                )
+            )
+        )
+        .then(CommandManager.literal("login")
+            .then(CommandManager.argument("contrasena", StringArgumentType.word())
+                .executes(context -> {
+                    ServerPlayerEntity player = context.getSource().getPlayer();
+                    String password = StringArgumentType.getString(context, "contrasena");
+                    String uuid = player.getUuid().toString();
+                    String ip = player.getIp();
+                    Map<String, Auth> authByUuid = Joined.getAuthByUuid();
+
+                    boolean success = Auth.login(authByUuid, uuid, password, ip);
+
+                    if (!success) {
+                        player.sendMessage(
+                            Text.literal("Contraseña incorrecta o no estás registrado").formatted(Formatting.RED),
+                            false
+                        );
+                        return 0;
+                    }
+
+                    Joined.markAuthenticated(player.getUuid());
+
+                    player.sendMessage(
+                        Text.literal("Has iniciado sesión correctamente!").formatted(Formatting.GREEN),
+                        false
+                    );
+
+                    return 1;
+                })
+            )
+        )
+);
+            
+            
+            
  // register <nombre> <apedido> <edad> [Male\Female]
 dispatcher.register(
     CommandManager.literal("register")
