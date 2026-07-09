@@ -23,4 +23,5 @@
 
 ||*Pssst… This is a secret… but the economy will be tied to real crypto — on‑chain!*||
 
-<img width="1366" height="768" alt="catworldbanner" src="https://github.com/user-attachments/assets/96be8de3-d15a-4ad3-8aa7-5cb7b5a545b8" />
+<img width="1921" height="1080" alt="logo-official" src="https://github.com/user-attachments/assets/80f9a80c-3842-427e-8d5e-4efd84b3c95f" />
+
